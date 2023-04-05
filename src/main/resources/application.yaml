@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: qwerty
+
+  mvc:
+    hidden-method:
+      filter:
+        enabled: true
+
+  liquibase:
+    user: ${LIQUIBASE_USER_NAME:postgres}
+    password: ${LIQUIBASE_USER_PASSWORD:qwerty}
+    change-log: classpath:db/liquibase-properties.xml
+    default-schema: public
+    enabled: true
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
