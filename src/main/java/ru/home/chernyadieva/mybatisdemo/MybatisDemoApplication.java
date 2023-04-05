@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import ru.home.chernyadieva.mybatisdemo.model.StudentModel;
 
 @MappedTypes(StudentModel.class)
-@MapperScan("ru.home.chernyadieva.mybatisdemo.mapper")
+@MapperScan("ru.home.chernyadieva.mybatisdemo.mapping")
 @SpringBootApplication
 public class MybatisDemoApplication {
 

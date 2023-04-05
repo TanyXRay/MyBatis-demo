@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.home.chernyadieva.mybatisdemo.dto.StudentDTO;
-import ru.home.chernyadieva.mybatisdemo.mapper.StudentMapping;
+import ru.home.chernyadieva.mybatisdemo.mapping.StudentMapping;
 import ru.home.chernyadieva.mybatisdemo.model.StudentModel;
 
 import java.time.LocalDateTime;
