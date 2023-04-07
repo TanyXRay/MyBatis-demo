@@ -1,13 +1,14 @@
 package ru.home.chernyadieva.mybatisdemo.controller;
 
+import org.apache.ibatis.annotations.Param;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.home.chernyadieva.mybatisdemo.dto.StudentDTO;
-import ru.home.chernyadieva.mybatisdemo.mapping.StudentMapping;
-import ru.home.chernyadieva.mybatisdemo.model.StudentModel;
+import ru.home.chernyadieva.mybatisdemo.mapper.StudentMapper;
+import ru.home.chernyadieva.mybatisdemo.model.Student;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,18 +17,18 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/api")
 public class StudentController {
-    private StudentMapping studentMapping;
+    private StudentMapper studentMapper;
     private ModelMapper modelMapper;
 
-    public StudentController(StudentMapping studentMapping, ModelMapper modelMapper) {
-        this.studentMapping = studentMapping;
+    public StudentController(StudentMapper studentMapper, ModelMapper modelMapper) {
+        this.studentMapper = studentMapper;
         this.modelMapper = modelMapper;
     }
 
     //GET
     @GetMapping("/students")
     public ResponseEntity<List<StudentDTO>> getStudent() {
-        List<StudentDTO> studentDTOList = studentMapping.findAll().stream()
+        List<StudentDTO> studentDTOList = studentMapper.findAll().stream()
                 .map(this::convertToStudentDTO)
                 .toList();
 
@@ -42,7 +43,7 @@ public class StudentController {
     @GetMapping("/{id}")
     public ResponseEntity<StudentDTO> getStudentFromId(@PathVariable(value = "id") int id) {
         try {
-            StudentDTO studentDTO = convertToStudentDTO(studentMapping.findStudentFromId(id));
+            StudentDTO studentDTO = convertToStudentDTO(studentMapper.findStudentFromId(id));
             return new ResponseEntity<>(studentDTO, HttpStatus.OK);
         } catch (RuntimeException e) {
             throw new RuntimeException("This object student with this id not found in DB!");
@@ -57,37 +58,42 @@ public class StudentController {
             throw new RuntimeException(bindingResult.getFieldError().getDefaultMessage());
         }
 
-        StudentModel studentModel = convertToStudentModel(newStudent);
-        studentModel.setTimeCreate(LocalDateTime.now());
-        studentMapping.putNewStudent(studentModel);
+        Student student = convertToStudentModel(newStudent);
+        student.setTimeCreate(LocalDateTime.now());
+        studentMapper.putNewStudent(student);
 
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     //PATCH
-    @PatchMapping("/add/{id}")
+    @PatchMapping("/patch/{id}")
     public ResponseEntity<HttpStatus> updateStudent(@RequestBody StudentDTO studentDTO,
-                                                    @PathVariable("id") int id) {
-        StudentModel studentModel = convertToStudentModel(studentDTO);
+                                                    @PathVariable @Param("id") int id) {
 
-        if (studentModel.getId() == 0) {
+        Student studentFromDB = studentMapper.findStudentFromId(id);
+        Student updateStudent = convertToStudentModel(studentDTO);
+
+        if (Objects.isNull(studentFromDB)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        studentMapping.updateStudent(studentModel, id);
+        updateStudent.setTimeCreate(LocalDateTime.now());
+        updateStudent.setId(id);
+        studentMapper.updateStudent(updateStudent);
+
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     //DELETE
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<HttpStatus> deleteStudent(@PathVariable("id") int id) {
-        StudentModel studentModel = studentMapping.findStudentFromId(id);
+        Student student = studentMapper.findStudentFromId(id);
 
-        if (Objects.isNull(studentModel)) {
+        if (Objects.isNull(student)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        studentMapping.deleteStudentFromId(id);
+        studentMapper.deleteStudentFromId(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -97,17 +103,17 @@ public class StudentController {
      * @param studentDTO
      * @return
      */
-    private StudentModel convertToStudentModel(StudentDTO studentDTO) {
-        return modelMapper.map(studentDTO, StudentModel.class);
+    private Student convertToStudentModel(StudentDTO studentDTO) {
+        return modelMapper.map(studentDTO, Student.class);
     }
 
     /**
      * Сущность конвертируем в DTO
      *
-     * @param studentModel
+     * @param student
      * @return
      */
-    private StudentDTO convertToStudentDTO(StudentModel studentModel) {
-        return modelMapper.map(studentModel, StudentDTO.class);
+    private StudentDTO convertToStudentDTO(Student student) {
+        return modelMapper.map(student, StudentDTO.class);
     }
 }

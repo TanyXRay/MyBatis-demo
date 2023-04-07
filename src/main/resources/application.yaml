@@ -18,6 +18,5 @@ spring:
     enabled: true
 
 mybatis:
-  configuration:
-    map-underscore-to-camel-case: true
   config-location: classpath:mybatis-config.xml
+  typeAliasesPackage: ru.home.chernyadieva.mybatisdemo.model

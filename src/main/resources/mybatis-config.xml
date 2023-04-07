@@ -4,11 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 
 <configuration>
-    <typeAliases>
-        <typeAlias type="ru.home.chernyadieva.mybatisdemo.dto" alias="StudentDTO"/>
-    </typeAliases>
-
     <mappers>
-        <mapper resource="mapper/studentMapper.xml"/>
+        <mapper resource="ru/home/chernyadieva/mybatisdemo/mapper/StudentMapper.xml"/>
     </mappers>
 </configuration>
